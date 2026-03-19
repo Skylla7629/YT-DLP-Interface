@@ -45,7 +45,7 @@ class Yt_dlp_cli:
             "--cookies-from-browser",
             "-b",
             action="store_true",
-            help="Use cookies from browser",
+            help="Use cookies from browser configured in environment variables",
         )
         parser.add_argument(
             "--get-thumbnail",
