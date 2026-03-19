@@ -5,3 +5,4 @@ DB_DATABASE=youtube_itunes_upload
 FFMPEG_PATH=/usr/bin/ffmpeg
 OUTPUT_TEMPLATE=/home/skylla/Music/
 COOKIES_PATH="/data/vsc-projects/Python - Projekte/Tools/Youtube MusicPLaylist Get/CLI-V1.0/cookies.txt"
+BROWSER="brave"

@@ -41,6 +41,12 @@ class Yt_dlp_cli:
             action="store_true",
             help="Keep video files after download",
         )
+        parser.add_argument(
+            "--cookies-from-browser",
+            "-b",
+            action="store_true",
+            help="Use cookies from browser",
+        )
 
         try:
             args = parser.parse_args()
@@ -59,7 +65,14 @@ class Yt_dlp_cli:
 
         if args.url:
             print("Downloading URL:", args.url)
-            self.downloader = Downloader(args.url, database=self.database)
+            if args.keep_video:
+                print("Keeping video files after download.")
+            self.downloader = Downloader(
+                args.url,
+                database=self.database,
+                keep_video=args.keep_video,
+                cookies_from_browser=args.cookies_from_browser,
+            )
             self.downloader.download_playlist()
 
         if args.edit:
@@ -71,11 +84,8 @@ class Yt_dlp_cli:
 
         if args.edit_directory:
             print("Editing mp3s in directory:", args.edit_directory)
-            if args.keep_video:
-                print("Keeping video files after download.")
-            self.dirEditor = DirectEdit(
-                args.edit_directory, keep_video=args.keep_video, database=self.database
-            )
+
+            self.dirEditor = DirectEdit(args.edit_directory, database=self.database)
             self.dirEditor.edit_files()
 
     def edit_existing(self):

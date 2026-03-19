@@ -10,7 +10,13 @@ from database import Database
 
 
 class Downloader:
-    def __init__(self, url, database: Database, keep_video: bool = False):
+    def __init__(
+        self,
+        url,
+        database: Database,
+        cookies_from_browser: bool = False,
+        keep_video: bool = False,
+    ):
         self.videoInfos = None
         self.database: Database = database
 
@@ -23,6 +29,9 @@ class Downloader:
             path = path[:-1]
         date = time.strftime("%Y-%d-%m")
         self.outfile = f"{path}/yt-dlp-{date}/%(title)s.%(ext)s"
+
+        self.cookies_from_browser = cookies_from_browser
+        self.browser = os.getenv("BROWSER", "")
 
         self.keep_video = keep_video
 
@@ -100,8 +109,12 @@ class Downloader:
             "ffmpeg_location": self.ffmpeg_path,
             "ignoreerrors": True,
             "keepvideo": self.keep_video,
-            "cookiefile": self.cookies_path,
         }
+
+        if self.cookies_from_browser:
+            optionsDownload["cookiesfrombrowser"] = (self.browser, None, None, None)
+        else:
+            optionsDownload["cookiefile"] = self.cookies_path
 
         data = {}
 
