@@ -1,9 +1,10 @@
-import sys
 import argparse
-from download import Downloader
+import json
+import sys
+
 from database import Database
 from directedit import DirectEdit
-import json
+from download import Downloader
 
 
 class Yt_dlp_cli:
@@ -15,11 +16,31 @@ class Yt_dlp_cli:
     def run(self):
 
         parser = argparse.ArgumentParser(description="YT-dlp CLI Tool")
-        parser.add_argument("--url", "-u", type=str, help="URL of the playlist to download")
+        parser.add_argument(
+            "--url", "-u", type=str, help="URL of the playlist to download"
+        )
         parser.add_argument("--edit", "-e", action="store_true", help="Edit mode")
-        parser.add_argument("--db-init", action="store_true", help="Initialize database")
-        parser.add_argument("--edit-directory", "-d", type=str, help="Automatically edit mp3s in this directory with data from database")
-        parser.add_argument("--edit-existing", "-x", action="store_true", help="Edit existing entries in database")
+        parser.add_argument(
+            "--db-init", action="store_true", help="Initialize database"
+        )
+        parser.add_argument(
+            "--edit-directory",
+            "-d",
+            type=str,
+            help="Automatically edit mp3s in this directory with data from database",
+        )
+        parser.add_argument(
+            "--edit-existing",
+            "-x",
+            action="store_true",
+            help="Edit existing entries in database",
+        )
+        parser.add_argument(
+            "--keep-video",
+            "-k",
+            action="store_true",
+            help="Keep video files after download",
+        )
 
         try:
             args = parser.parse_args()
@@ -50,23 +71,28 @@ class Yt_dlp_cli:
 
         if args.edit_directory:
             print("Editing mp3s in directory:", args.edit_directory)
-            self.dirEditor = DirectEdit(args.edit_directory, database=self.database)
+            if args.keep_video:
+                print("Keeping video files after download.")
+            self.dirEditor = DirectEdit(
+                args.edit_directory, keep_video=args.keep_video, database=self.database
+            )
             self.dirEditor.edit_files()
-
 
     def edit_existing(self):
         while True:
-            search_option = input("Search by \n\t(1) Title\n\t(2) Title + Artist\n\t(q) Quit\n\n: ")
+            search_option = input(
+                "Search by \n\t(1) Title\n\t(2) Title + Artist\n\t(q) Quit\n\n: "
+            )
             results = None
             match search_option:
-                case '1':
+                case "1":
                     search_title = input("Enter title to search: ")
                     results = self.entry_search(search_title)
-                case '2':
+                case "2":
                     search_title = input("Enter title to search: ")
                     search_artist = input("Enter artist to search: ")
                     results = self.entry_search(search_title, search_artist)
-                case 'q':
+                case "q":
                     break
                 case _:
                     print("Invalid option. Please try again.")
@@ -76,9 +102,11 @@ class Yt_dlp_cli:
                 continue
             print("\nSearch Results:")
             for idx, row in enumerate(results, start=1):
-                print(f"{idx}. Title: {row[1]}, Artist: {row[3]}, Album: {row[4]}, Year: {row[7]}")
+                print(
+                    f"{idx}. Title: {row[1]}, Artist: {row[3]}, Album: {row[4]}, Year: {row[7]}"
+                )
             selection = input("Select an entry to edit by number (or 'q' to quit): ")
-            if selection.lower() == 'q':
+            if selection.lower() == "q":
                 break
             try:
                 selection_idx = int(selection) - 1
@@ -93,18 +121,17 @@ class Yt_dlp_cli:
                 "title": selected_entry[2],
                 "url": selected_entry[9],
                 "description": selected_entry[10],
-                "releaseDate": selected_entry[8]
+                "releaseDate": selected_entry[8],
             }
             self.edit_title(info, selected_entry[2])
 
-
     def entry_search(self, search_title, search_artist=None):
         if search_artist:
-            return self.database.get_titles(title=search_title, artist=search_artist, limit=3)
+            return self.database.get_titles(
+                title=search_title, artist=search_artist, limit=3
+            )
         else:
             return self.database.get_titles(title=search_title, limit=5)
-
-
 
     def edit_mode(self):
         # loop over vidoeInfos
@@ -121,17 +148,18 @@ class Yt_dlp_cli:
         #     change data?
         # next
 
-        with open('videoInfos.json', 'r') as f:
+        with open("videoInfos.json", "r") as f:
             data = json.load(f)
         if not data:
             print("No video information found.")
             return
         for video_org_title, info in data.items():
             if self.database.get_title_by_url(info.get("url", "")):
-                print(f"Title '{video_org_title}' already exists in database. Skipping.")
+                print(
+                    f"Title '{video_org_title}' already exists in database. Skipping."
+                )
                 continue
             self.edit_title(info, video_org_title)
-
 
     def edit_title(self, info, video_org_title):
         data = info
@@ -143,14 +171,16 @@ class Yt_dlp_cli:
             print(f"  {key}: {value}")
         new_title = input("Enter new title (or press Enter to keep current): ")
         if new_title:
-            data['title'] = new_title
+            data["title"] = new_title
         else:
-            data['title'] = video_org_title
+            data["title"] = video_org_title
         data["artist"] = input("Enter artist name: ")
         data["album"] = input("Enter album name (return for single): ")
         if not data["album"]:
             data["album"] = data["title"] + " - Single"
-        data["album_artist"] = input("Enter album artist name (return for same as song): ")
+        data["album_artist"] = input(
+            "Enter album artist name (return for same as song): "
+        )
         if not data["album_artist"]:
             data["album_artist"] = data["artist"]
         data["genre"] = input("Enter genre: ")
@@ -163,7 +193,7 @@ class Yt_dlp_cli:
             print("Title already exists in database:")
             print(self.database.get_title(overwrite))
             overwrite_input = input("Do you want to overwrite it? (y/n): ").lower()
-            if overwrite_input == 'y':
+            if overwrite_input == "y":
                 self.database.update_title(data, overwrite)
                 print("Title overwritten.")
             else:

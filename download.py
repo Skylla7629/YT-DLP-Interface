@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 import dotenv
 from yt_dlp import YoutubeDL
@@ -9,7 +10,7 @@ from database import Database
 
 
 class Downloader:
-    def __init__(self, url, database: Database):
+    def __init__(self, url, database: Database, keep_video: bool = False):
         self.videoInfos = None
         self.database: Database = database
 
@@ -17,7 +18,13 @@ class Downloader:
 
         self.ffmpeg_path = os.getenv("FFMPEG_PATH", "")
         self.cookies_path = os.getenv("COOKIES_PATH", "")
-        self.outfile = os.getenv("OUTPUT_TEMPLATE", "")
+        path = os.getenv("OUTPUT_TEMPLATE", "")
+        if path.endswith("/"):
+            path = path[:-1]
+        date = time.strftime("%Y-%d-%m")
+        self.outfile = f"{path}/yt-dlp-{date}/%(title)s.%(ext)s"
+
+        self.keep_video = keep_video
 
         self.url = url
 
@@ -92,7 +99,7 @@ class Downloader:
             "skip_unavailable_fragments": False,
             "ffmpeg_location": self.ffmpeg_path,
             "ignoreerrors": True,
-            "keepvideo": True,
+            "keepvideo": self.keep_video,
             "cookiefile": self.cookies_path,
         }
 
