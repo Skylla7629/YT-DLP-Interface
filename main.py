@@ -39,7 +39,7 @@ class Yt_dlp_cli:
             "--keep-video",
             "-k",
             action="store_true",
-            help="Keep video files after download",
+            help="Keep video files after download (when postprocessing to mp3 is enabled)",
         )
         parser.add_argument(
             "--cookies-from-browser",
