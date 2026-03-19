@@ -47,6 +47,18 @@ class Yt_dlp_cli:
             action="store_true",
             help="Use cookies from browser",
         )
+        parser.add_argument(
+            "--get-thumbnail",
+            "-t",
+            action="store_true",
+            help="Get thumbnail for downloaded videos",
+        )
+        parser.add_argument(
+            "--no-postprocessing",
+            "-p",
+            action="store_true",
+            help="Disable postprocessing to mp3",
+        )
 
         try:
             args = parser.parse_args()
@@ -72,6 +84,7 @@ class Yt_dlp_cli:
                 database=self.database,
                 keep_video=args.keep_video,
                 cookies_from_browser=args.cookies_from_browser,
+                no_postprocess=not args.no_postprocessing,
             )
             self.downloader.download_playlist()
 

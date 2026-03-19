@@ -16,6 +16,8 @@ class Downloader:
         database: Database,
         cookies_from_browser: bool = False,
         keep_video: bool = False,
+        get_thumbnail: bool = False,
+        no_postprocess: bool = False,
     ):
         self.videoInfos = None
         self.database: Database = database
@@ -30,10 +32,14 @@ class Downloader:
         date = time.strftime("%Y-%d-%m")
         self.outfile = f"{path}/yt-dlp-{date}/%(title)s.%(ext)s"
 
+        self.format = os.getenv("FORMAT", "bestaudio/best")
+
         self.cookies_from_browser = cookies_from_browser
         self.browser = os.getenv("BROWSER", "")
 
+        self.postprocess = not no_postprocess
         self.keep_video = keep_video
+        self.get_thumbnail = get_thumbnail
 
         self.url = url
 
@@ -69,22 +75,9 @@ class Downloader:
         impersonateTgt = ImpersonateTarget.from_str("chrome-136")
 
         optionsDownload = {
-            "format": "bestaudio/best",
+            "format": self.format,
             "remote_components": ["ejs:github"],
             "outtmpl": self.outfile,
-            "postprocessors": [
-                {
-                    "key": "FFmpegExtractAudio",
-                    "preferredcodec": "mp3",
-                    "preferredquality": "192",
-                },
-                {
-                    "key": "EmbedThumbnail",  # Optional: adds album art
-                },
-                {
-                    "key": "FFmpegMetadata",  # Optional: adds title/artist tags
-                },
-            ],
             "impersonate": impersonateTgt,
             "use_curl_cffi": True,
             "extractor_args": {
@@ -109,12 +102,28 @@ class Downloader:
             "ffmpeg_location": self.ffmpeg_path,
             "ignoreerrors": True,
             "keepvideo": self.keep_video,
+            "writethumbnail": self.get_thumbnail,
         }
 
         if self.cookies_from_browser:
             optionsDownload["cookiesfrombrowser"] = (self.browser, None, None, None)
         else:
             optionsDownload["cookiefile"] = self.cookies_path
+
+        if self.postprocess:
+            optionsDownload["postprocessors"] = [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                },
+                {
+                    "key": "EmbedThumbnail",  # Optional: adds album art
+                },
+                {
+                    "key": "FFmpegMetadata",  # Optional: adds title/artist tags
+                },
+            ]
 
         data = {}
 
