@@ -84,7 +84,7 @@ class Yt_dlp_cli:
                 database=self.database,
                 keep_video=args.keep_video,
                 cookies_from_browser=args.cookies_from_browser,
-                no_postprocess=not args.no_postprocessing,
+                postprocess=not args.no_postprocessing,
             )
             self.downloader.download_playlist()
 

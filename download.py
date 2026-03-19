@@ -17,7 +17,7 @@ class Downloader:
         cookies_from_browser: bool = False,
         keep_video: bool = False,
         get_thumbnail: bool = False,
-        no_postprocess: bool = False,
+        postprocess: bool = False,
     ):
         self.videoInfos = None
         self.database: Database = database
@@ -37,7 +37,7 @@ class Downloader:
         self.cookies_from_browser = cookies_from_browser
         self.browser = os.getenv("BROWSER", "")
 
-        self.postprocess = not no_postprocess
+        self.postprocess = postprocess
         self.keep_video = keep_video
         self.get_thumbnail = get_thumbnail
 
