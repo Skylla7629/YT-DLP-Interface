@@ -59,6 +59,12 @@ class Yt_dlp_cli:
             action="store_true",
             help="Disable postprocessing to mp3",
         )
+        parser.add_argument(
+            "--duplicate-check",
+            "-c",
+            action="store_true",
+            help="Check for duplicate mp3 files in a directory and remove them",
+        )
 
         try:
             args = parser.parse_args()
@@ -101,6 +107,12 @@ class Yt_dlp_cli:
 
             self.dirEditor = DirectEdit(args.edit_directory, database=self.database)
             self.dirEditor.edit_files()
+
+        if args.duplicate_check:
+            from tools.duplicateAudio import main as duplicate_main
+
+            print("Checking for duplicate mp3 files in directory...")
+            duplicate_main()
 
     def edit_existing(self):
         while True:

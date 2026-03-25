@@ -1,8 +1,9 @@
 import os
-from tkinter import filedialog
+
 
 def get_directory(title="Select Directory"):
-    return filedialog.askdirectory(title=title)
+    print(title, end=" (path): ")
+    return input()
 
 
 def get_subfolders(directory):
@@ -35,9 +36,8 @@ def removeDuplicates(duplicates, directory):
         os.remove(f"{directory}/{file}")
 
 
-
 def main():
-    directory = get_directory()
+    directory = get_directory(title="Select Directory to use as Base")
     subfolders = get_subfolders(directory)
     dirToCheck = get_directory(title="Select Directory to check for duplicates")
     filesToCheck = get_files(dirToCheck)
@@ -65,7 +65,6 @@ def main():
             pass
         case _:
             pass
-        
 
 
 if __name__ == "__main__":
