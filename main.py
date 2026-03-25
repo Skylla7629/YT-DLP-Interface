@@ -78,7 +78,10 @@ class Yt_dlp_cli:
             self.database.main_table_init()
             print("Database initialized.")
 
-        if not args.url:
+        # Check if no arguments other than --db-init are given
+        if not args.url and not any(
+            value for key, value in vars(args).items() if key != "db_init"
+        ):
             args.url = input("If you wish to download a playlist enter URL now: ")
 
         if args.url:

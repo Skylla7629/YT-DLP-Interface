@@ -11,10 +11,16 @@ def get_subfolders(directory):
 
     subfolders = {}
 
-    for direct in dirs:
-        if direct.is_dir():
-            subfolders[direct.name] = direct.path
-
+    try:
+        for direct in dirs:
+            if direct.is_dir() and not os.path.islink(direct.path):
+                subfolders[direct.name] = direct.path
+                subfolders.update(get_subfolders(direct.path))
+    except PermissionError:
+        print(f"Permission denied (continue): {directory}")
+    except FileNotFoundError:
+        print("Internal error: Directory not found.")
+        exit(1)
     return subfolders
 
 
@@ -56,7 +62,13 @@ def main():
         if file in files:
             duplicates.append(file)
 
-    print(f"Duplicates: {duplicates}")
+    if not duplicates:
+        print("No duplicates found.")
+        return
+
+    print(f"Found {len(duplicates)} duplicates:")
+    for i, file in enumerate(duplicates):
+        print(f"Duplicate: ({i}) {dirToCheck}/{file}")
     x = input("Remove all duplicates? (Y/n) ")
     match x:
         case "Y":
