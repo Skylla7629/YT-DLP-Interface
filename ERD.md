@@ -2,8 +2,8 @@
 
 erDiagram
 
-  artist||--o{ title : "owner of"
-  artist||--o{ album : "owner of"
+  artist ||--o{ title : "owner of"
+  artist ||--o{ album : "owner of"
   album ||--o{ TRACK : "consists of"
   title ||--o{ TRACK : "is used in"
   
