@@ -3,13 +3,13 @@ import requests
 
 def main():
     print(
-        format(
-            get_title(
-                input("Enter song title: "),
-                input("Enter artist name (optional): "),
-                int(input("Limit: ") or 5),
-            )
+        # format(
+        get_title(
+            input("Enter song title: "),
+            input("Enter artist name (optional): "),
+            int(input("Limit: ") or 5),
         )
+        # )
     )
 
 
