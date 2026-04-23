@@ -2,57 +2,81 @@
 
 erDiagram
 
-  artist ||--o{ title : "owner of"
-  artist ||--o{ album : "owner of"
-  album ||--o{ TRACK : "consists of"
-  title ||--o{ TRACK : "is used in"
+  ARTIST ||--o{ TITLE_ARTIST : "owner of"
+  TITLE ||--o{ TITLE_ARTIST : "is used in"
   
-  title }o--o{ genre : "classified as"
-  album }o--o{ genre : "classified as"
+  ARTIST ||--o{ ALBUM : "owner of"
+  ALBUM ||--o{ TRACK : "consists of"
+  TITLE ||--o{ TRACK : "is used in"
   
-  video }o--o{ title : "associated with" # compilations / multiple vids contain same title
+  TITLE ||--o{ TITLE_GENRE : "classified as"
+  GENRE ||--o{ TITLE_GENRE : "is used in"
+  ALBUM ||--o{ ALBUM_GENRE : "classified as"
+  GENRE ||--o{ ALBUM_GENRE : "is used in"
   
-
-  title {
+  VIDEO ||--o{ VIDEO_TITLE : "associated with" # compilations / multiple vids contain same title
+  TITLE ||--o{ VIDEO_TITLE : "associated with"
+  
+  TITLE_ARTIST {
+    int id PK
+    int title_id FK
+    int artist_id FK
+  }
+  
+  TITLE_GENRE {
+    int id PK
+    int title_id FK
+    int genre_id FK
+  }
+  
+  ALBUM_GENRE {
+    int id PK
+    int album_id FK
+    int genre_id FK
+  }
+  
+  VIDEO_TITLE {
+    int id PK
+    int video_id FK
+    int title_id FK
+  }
+  
+  TITLE {
     int id PK
     string MusicBrainzID UK (recording.id)
-    int artsist_id FK
-    string Name UK "Name + artist_id = UK"
+    string Name
     string date-added
   }
   
   TRACK {
     int id PK
-    string TheAudioDBID UK (idTrack)
-    string MusicBrainzID UK (media.track.id)
     int album_id FK
     int title_id FK
     int track_number
   }
   
-  artist { # in this case simplyfied artist and groups
+  ARTIST { # in this case simplyfied artist and groups
     int id PK
-    string MusicBrainzID UK (recording.artist-credit-id)
-    string TheAudioDBID UK (idArtist)
+    int artist_id FK
+    string MusicBrainzID UK (artist.id)
     string Name
   }
   
-  album {
+  ALBUM {
     int id PK
-    string MusicBrainzID UK (media.id)
-    string TheAudioDBID UK (idAlbum)
+    string MusicBrainzID UK (release-group.id)
     string year
     string Name
   }
   
-  genre { # list of predefined genres to map added titles against
+  GENRE { # list of predefined genres to map added titles against
     int id PK
     string Name
   }
   
-  video {
+  VIDEO {
     int id PK
-    int url UK
+    string url UK
     string platform
     string releaseDate
     string title
