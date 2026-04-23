@@ -1,16 +1,16 @@
+import json
+
 import requests
 
 
 def main():
-    print(
-        # format(
-        get_title(
-            input("Enter song title: "),
-            input("Enter artist name (optional): "),
-            int(input("Limit: ") or 5),
-        )
-        # )
+    res = get_title(
+        input("Enter song title: "),
+        input("Enter artist name (optional): "),
+        int(input("Limit: ") or 5),
     )
+    with open("response-TADB.json", "w") as f:
+        json.dump(res, f, indent=4)
 
 
 def get_title(title: str, artist: str = "", limit=5) -> dict:
