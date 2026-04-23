@@ -8,6 +8,7 @@ dependencies = [
     "mutagen>=1.47.0",
     "mysql-connector-python>=9.5.0",
     "python-dotenv>=1.2.1",
+    "rapidfuzz>=3.14.5",
     "requests>=2.33.1",
     "typer>=0.20.0",
     "yt-dlp>=2026.3.17",
