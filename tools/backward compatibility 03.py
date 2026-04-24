@@ -8,7 +8,6 @@ from rapidfuzz import fuzz
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from api_connector_music_brainz import MusicBrainzAPI
-from database_new import Database
 
 
 def main():
@@ -26,21 +25,18 @@ def main():
     for i, item in enumerate(data, 1):
         title = item.get("title", "")
         artist = item.get("artist", "")
-        album = item.get("album", "")
-        release_date = item.get("releaseDate", "")
-        url = item.get("URL", "")
-        description = item.get("description", "")
 
         if title.startswith("Nightcore - "):
-            title = title[len("Nightcore - ") :]
-
+            search_title = title[len("Nightcore - ") :]
+        else:
+            search_title = title
         sleep(1)
 
         print(f"({i}/{len(data)})", end=" ")
-        recordings = api.get_title(title, artist, limit=1)
+        recordings = api.get_title(search_title, artist, limit=1)
         if recordings:
             recording = recordings[0]
-            score = fuzz.ratio(recording.get("title", ""), title)
+            score = fuzz.ratio(recording.get("title", ""), search_title)
             if score == 100:
                 print(
                     f"Fetched data for: {title} by {artist}\n\033[35m-- Score: {round(score, 1)} -- \033[0m{recording['title']} by {recording['artist-credit'][0]['name']}"
