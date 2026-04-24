@@ -6,9 +6,10 @@ from time import sleep
 
 from rapidfuzz import fuzz
 
+from api import MusicBrainzAPI
+from database.database_v2 import Database
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from api_connector_music_brainz import MusicBrainzAPI
-from database_v2 import Database
 
 RED = "\033[31m"
 GREEN = "\033[32m"

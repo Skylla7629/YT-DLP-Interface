@@ -2,9 +2,9 @@ import argparse
 import json
 import sys
 
-from database import Database
-from directedit import DirectEdit
+from database.database_v2 import Database
 from download import Downloader
+from editor import DirectEdit
 
 
 class Yt_dlp_cli:

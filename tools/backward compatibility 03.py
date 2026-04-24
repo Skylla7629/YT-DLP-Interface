@@ -5,9 +5,9 @@ from time import sleep
 
 from rapidfuzz import fuzz
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from api import MusicBrainzAPI
 
-from api_connector_music_brainz import MusicBrainzAPI
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 def main():

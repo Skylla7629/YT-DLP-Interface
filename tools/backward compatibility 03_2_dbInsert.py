@@ -2,8 +2,9 @@ import json
 import os
 import sys
 
+from database.database_v2 import Database
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from database_v2 import Database
 
 RED = "\033[31m"
 GREEN = "\033[32m"
