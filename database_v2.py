@@ -1,5 +1,6 @@
 # databaes connection for YT-dlp project
 import os
+import uuid
 from typing import Any, List
 
 import dotenv
@@ -31,6 +32,7 @@ class Database:
                             id INT AUTO_INCREMENT PRIMARY KEY,
                             name VARCHAR(255) NOT NULL,
                             MBID VARCHAR(255) NULL,
+                            CONSTRAINT unique_title_name_mbid UNIQUE (name, MBID),
                             date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                             ) ENGINE = InnoDB
                               DEFAULT CHARSET = utf8mb4;
@@ -173,6 +175,9 @@ class Database:
     def commit(self):
         self.conn.commit()
 
+    def rollback(self):
+        self.conn.rollback()
+
     ## Insert functions
     def insert(
         self, query: str, params: tuple, failover_query: str, failover_params: tuple
@@ -183,13 +188,15 @@ class Database:
             self.cursor.execute(
                 query, params
             )  # expects an insert query with unique constraints on the parameters
-            self.commit()
             return self.cursor.lastrowid
         except mysql.connector.IntegrityError:
             self.cursor.execute(
                 failover_query, failover_params
             )  # expects a search query over the failover parameters, returning the id of the unique constraint
             result: Any = self.cursor.fetchone()
+            print(
+                f"Entry already exists for parameters {failover_params}, returning existing id: {result[0]}"
+            )
             return (
                 (int(result[0]) or None) if result else None
             )  # works only with 1-based ids
@@ -302,6 +309,15 @@ class Database:
         entry = self.get_entry_by_mbid(table, mbid)
         return entry[0] if entry else None
 
+    def get_video_by_url(self, url: str) -> tuple | None:
+        self.cursor.execute("SELECT * FROM video WHERE url = %s", (url,))
+        ret = self.cursor.fetchone()
+        return tuple(ret) if ret else None
+
+    def get_video_id_by_url(self, url: str) -> int | None:
+        video = self.get_video_by_url(url)
+        return video[0] if video else None
+
     def get_artist(self, name: str) -> List[tuple]:
         self.cursor.execute("SELECT * FROM artist WHERE name = %s", (name,))
         return [tuple(row) for row in self.cursor.fetchall()]
@@ -327,6 +343,49 @@ class Database:
             (title_name, artist_id),
         )
         return [tuple(row) for row in self.cursor.fetchall()]
+
+    def clear_all_data(self):
+        self.cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+        self.cursor.execute("TRUNCATE TABLE video_title")
+        self.cursor.execute("TRUNCATE TABLE title_genre")
+        self.cursor.execute("TRUNCATE TABLE album_genre")
+        self.cursor.execute("TRUNCATE TABLE title_artist")
+        self.cursor.execute("TRUNCATE TABLE track")
+        self.cursor.execute("TRUNCATE TABLE video")
+        self.cursor.execute("TRUNCATE TABLE genre")
+        self.cursor.execute("TRUNCATE TABLE album")
+        self.cursor.execute("TRUNCATE TABLE artist")
+        self.cursor.execute("TRUNCATE TABLE title")
+        self.cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+        # this action is irreversible, use with caution | as precaution commit has to be executed seperately after this function to take effect
+
+    def drop_all_tables(self):
+        self.cursor.execute("DROP TABLE IF EXISTS video_title")
+        self.cursor.execute("DROP TABLE IF EXISTS title_genre")
+        self.cursor.execute("DROP TABLE IF EXISTS album_genre")
+        self.cursor.execute("DROP TABLE IF EXISTS title_artist")
+        self.cursor.execute("DROP TABLE IF EXISTS track")
+        self.cursor.execute("DROP TABLE IF EXISTS video")
+        self.cursor.execute("DROP TABLE IF EXISTS genre")
+        self.cursor.execute("DROP TABLE IF EXISTS album")
+        self.cursor.execute("DROP TABLE IF EXISTS artist")
+        self.cursor.execute("DROP TABLE IF EXISTS title")
+        # this action is irreversible, use with caution | as precaution commit has to be executed seperately after this function to take effect
+
+    def generate_uid(self, table: str) -> str:
+        if table not in ["title", "artist", "album"]:
+            raise ValueError("Table must one of 'title', 'artist', 'album'")
+
+        while True:
+            prefix = {
+                "title": "TITL",
+                "artist": "ARTS",
+                "album": "ALBM",
+            }[table]
+            uid = f"00000000-{prefix}-0000-0000-{uuid.uuid4().hex[:12]}"
+            self.cursor.execute(f"SELECT id FROM {table} WHERE MBID = %s", (uid,))
+            if not self.cursor.fetchone():
+                return uid
 
 
 # EOF
